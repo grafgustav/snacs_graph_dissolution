@@ -1,3 +1,4 @@
+import networkx as nx
 
 
 class GraphProcessor:
@@ -7,16 +8,37 @@ class GraphProcessor:
     paper.
     """
 
+    @staticmethod
+    def transform_scored_edge_list_to_graph(edge_list, graph, threshold):
+        """
+        Helper method to transform a given edge list with scores in the form of (source, target, score) to a graph.
+        The score determines whether an edge needs to be removed or not. A threshold is defined for the transformation.
+        :param edge_list: The scored edge list as triple (source, target, score)
+        :param graph: The input graph, whose edges will be altered
+        :param threshold: The threshold used to determine whether an edge should be removed
+        :return: a networkx DiGraph
+        """
+        result_graph = graph.copy()
+        for source, target, score in edge_list:
+            if score >= threshold:
+                result_graph.remove_edge(source, target)
+        return result_graph
+
     # Complement score methods - Use link prediction functions on existing links and complement score
     @staticmethod
     def preferential_attachment(graph):
         """
         Using the degree of the two nodes being connected by an edge, predict the probability of this edge to be removed.
         :param graph: input graph as adjacency matrix
-        :return: adjacency matrix containing probabilities
+        :return: edge list containing probabilities
         """
+        # result list contains edges and their predicted scores (source, target, score)
         result = []
-
+        for source, target in graph.edges:
+            source_degree = nx.degree(graph, source)
+            target_degree = nx.degree(graph, target)
+            score = -1 * source_degree * target_degree
+            result.append((source, target, score))
         return result
 
     @staticmethod

@@ -41,9 +41,9 @@ class WikipediaParser:
             spl = line.split()
             if len(spl) == 4:
                 # store that stuff in triples (source, target, weight, timestamp)
-                edges.append((spl[0], spl[1], spl[2], spl[3]))
-                timestamps.append(spl[3])
-        return edges, timestamps
+                edges.append((int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3])))
+                timestamps.append(int(spl[3]))
+        return edges, sorted(timestamps)
 
     def get_first_subgraph(self):
         return self._graph1
@@ -58,7 +58,7 @@ class WikipediaParser:
         return max(self._timestamps)
 
     def get_median_timestamp(self):
-        median = self._timestamps.sort()[int(len(self._timestamps)/2)]
+        median = self._timestamps[int(len(self._timestamps)/2)]
         return median
 
     def _build_graphs(self):
