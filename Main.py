@@ -16,7 +16,8 @@ def main_function():
     # edges decreased, nodes constant
     print("Starting graph processing operations")
     pred_edge_list = gp.preferential_attachment(trainings_graph)
-    pred_graph = gp.transform_scored_edge_list_to_graph(pred_edge_list)
+    print(pred_edge_list)
+    pred_graph = gp.transform_scored_edge_list_to_graph(pred_edge_list, trainings_graph, threshold=-1000)
     precision, recall = gc.compare_grahs(pred_graph, groundtruth_graph)
     print("Preferential Attachment scores: Precision: %s; Recall: %s" % (precision, recall))
     print("Exiting...")

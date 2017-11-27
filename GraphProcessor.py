@@ -24,6 +24,7 @@ class GraphProcessor:
                 result_graph.remove_edge(source, target)
         return result_graph
 
+    ####################################################################################################################
     # Complement score methods - Use link prediction functions on existing links and complement score
     @staticmethod
     def preferential_attachment(graph):
@@ -88,6 +89,7 @@ class GraphProcessor:
 
         return result
 
+    ####################################################################################################################
     # Complement network - Use link prediction functions on non-existing edges in complement network and use as link
     # removal prediction
 

@@ -1,3 +1,4 @@
+import networkx as nx
 
 
 class GraphComparator:
@@ -7,14 +8,46 @@ class GraphComparator:
     """
 
     @staticmethod
-    def compare_grahs(graph1, graph2):
+    def compare_grahs(pred_graph, gt_graph):
         """
-        Compares two graphs with the first one being the predicted graph. Returns the precision and recall values.
-        :param graph1: first input graph
-        :param graph2: second input graph
+        Compares two graphs with the first one being the predicted graph. Returns the precision and recall values of
+        left over edges.
+        The nodes are expected to be the same set.
+        :param pred_graph: first input graph
+        :param gt_graph: second input graph
         :return: Precision, Recall
         """
-        precision = -1
-        recall = -1
+        # condition not satisfied
+        if nx.number_of_nodes(pred_graph) != nx.number_of_nodes(gt_graph):
+            return -1, -1
+
+        # count true positives
+        true_positives = 0
+        for source, target in pred_graph.edges:
+            if gt_graph.has_edge(source, target):
+                true_positives += 1
+
+        # true positives divided by all positives
+        precision = true_positives / nx.number_of_edges(pred_graph)
+        # true positives divided by all possible true positives
+        recall = true_positives / nx.number_of_edges(gt_graph)
+
+        return precision, recall
+
+    @staticmethod
+    def compare_edge_lists(pred_edge_list, gt_edge_list):
+        """
+        Compare two edge lists of edges to be deleted.
+        :param pred_edge_list: The predicted edge list
+        :param gt_edge_list: The Ground Truth edge list
+        :return: precision, recall
+        """
+        true_positives = 0
+        for edge in pred_edge_list:
+            if edge in gt_edge_list:
+                true_positives += 1
+
+        recall = true_positives / len(gt_edge_list)
+        precision = true_positives / len(pred_edge_list)
 
         return precision, recall
