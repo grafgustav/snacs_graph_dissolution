@@ -75,8 +75,18 @@ class GraphProcessor:
         :param graph: input graph as adjacency matrix
         :return: adjacency matrix containing probabilities
         """
-        result = []
+        degrees = dict()
+        for node in nx.nodes(graph):
+            degrees[node] = set(nx.degree(graph, node))      
 
+
+        result = []
+    
+        for source, target in nx.edges(graph):
+
+            result.append((source, target,
+                           (-1) * len(neighbor_dictionary[source].intersection(neighbor_dictionary[target] / math.sqrt(degrees[source] * math.sqrt(degrees[target])))))
+  
         return result
 
     @staticmethod
