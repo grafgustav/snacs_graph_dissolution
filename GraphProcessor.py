@@ -120,23 +120,24 @@ class GraphProcessor:
         :param graph: input graph as adjacency matrix
         :return: adjacency matrix containing probabilities
         """
-         for source, target in nx.edges(graph):
-
-            result.append((source, target,
-
-                           (-1) * len(neighbor_dictionary[source].intersection(neighbor_dictionary[target])))) = k  
-           for k in intersection(neighbor_dictionary)
-               
-degrees = dict()
+        degrees = dict()
         for node in nx.nodes(graph):
             degrees[node] = nx.degree(graph, node)
 
+        neighbor_dictionary = dict()
+        for node in nx.nodes(graph):
+            neighbor_dictionary[node] = set(nx.neighbors(graph, node))
 
         result = []
-        1 / math.log(degrees[k])
-
+        for source, target in nx.edges(graph):
+            k_sum = 0
+            for node in neighbor_dictionary[source].intersection(neighbor_dictionary[target]):
+                if degrees[node] > 1:
+                    k_sum += 1/math.log2(degrees[node])
+            result.append((source, target, (-1)*k_sum))
 
         return result
+
     ####################################################################################################################
     # Complement network - Use link prediction functions on non-existing edges in complement network and use as link
     # removal prediction

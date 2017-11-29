@@ -19,11 +19,11 @@ def main_function():
     # edges decreased, nodes constant
     print("Starting graph processing operations")
 
-    # execute_tests("Preferential attachment", trainings_graph, gt_edges, gp.preferential_attachment)
-    # execute_tests("Common neighbors", trainings_graph, gt_edges, gp.common_neighbors)
-    # execute_tests("Cosine similarity", trainings_graph, gt_edges, gp.cosine_similarity)
-    # execute_tests("Jaccard index", trainings_graph, gt_edges, gp.jaccard_index)
-    execute_tests()
+    execute_tests("Preferential attachment", trainings_graph, gt_edges, gp.preferential_attachment)
+    execute_tests("Common neighbors", trainings_graph, gt_edges, gp.common_neighbors)
+    execute_tests("Cosine similarity", trainings_graph, gt_edges, gp.cosine_similarity)
+    execute_tests("Jaccard index", trainings_graph, gt_edges, gp.jaccard_index)
+    execute_tests("Adamic-Adar", trainings_graph, gt_edges, gp.adamic_adar)
 
     start_time = time.time()
     gp.get_complement_network(trainings_graph)
