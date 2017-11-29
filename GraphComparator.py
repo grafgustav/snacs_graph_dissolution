@@ -45,11 +45,12 @@ class GraphComparator:
         """
         true_positives = 0
         set_list = set(gt_edge_list)
-        for source, target, score in pred_edge_list:
+        scored_positives = [(source, target) for source, target, score in pred_edge_list if score <= threshold]
+        for source, target in scored_positives:
             if (source, target) in set_list:
                 true_positives += 1
 
         recall = true_positives / len(set_list)
-        precision = true_positives / len(set_list)
+        precision = true_positives / len(scored_positives)
 
         return precision, recall

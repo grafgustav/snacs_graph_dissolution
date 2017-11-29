@@ -2,6 +2,9 @@
 from snacs_2017.snacs_graph_dissolution.WikipediaParser import WikipediaParser
 from snacs_2017.snacs_graph_dissolution.GraphProcessor import GraphProcessor as gp
 from snacs_2017.snacs_graph_dissolution.GraphComparator import GraphComparator as gc
+from operator import itemgetter
+import math
+import time
 
 
 def main_function():
@@ -9,23 +12,45 @@ def main_function():
     wp = WikipediaParser("out.link-dynamic-simplewiki", load=True)
     trainings_graph = wp.get_first_subgraph()
     gt_edges = wp.get_gt_edges()
-    print(
-        "Trainings graph: %s edges, %s nodes" % (trainings_graph.number_of_edges(), trainings_graph.number_of_nodes()))
+    print("Trainings graph: %s edges, %s nodes"
+          % (trainings_graph.number_of_edges(), trainings_graph.number_of_nodes()))
     print("%s edges to be deleted" % len(gt_edges))
     # edges decreased, nodes constant
     print("Starting graph processing operations")
-    pred_edge_list = gp.preferential_attachment(trainings_graph)
-    print("Calculating first score")
-    for i in range(4870, 4900, 10):
-        precision, recall = gc.compare_edge_lists(pred_edge_list, gt_edges, threshold=i*(-1))
-        print("Preferential Attachment scores: Precision: %s; Recall: %s" % (precision, recall))
 
-    pred_edge_list = gp.common_neighbors(trainings_graph)
-    for i in range(0, 50, 10):
-        precision, recall = gc.compare_edge_lists(pred_edge_list, gt_edges, threshold=i*(-1))
-        print("Common neighbors scores: Precision: %s; Recall: %s" % (precision, recall))
+    execute_tests("Preferential attachment", trainings_graph, gt_edges, gp.preferential_attachment)
+    execute_tests("Common neighbors", trainings_graph, gt_edges, gp.common_neighbors)
 
     print("Exiting...")
+
+
+def execute_tests(name, trainings_graph, gt_edges, func):
+    FALPHA = 0.5
+    FBETA = 1-FALPHA
+
+    start_time = time.time()
+
+    print("Calculating %s" % name)
+    pred_edge_list = func(trainings_graph)
+    best_threshold = -1
+    best_precision = -1
+    best_recall = -1
+    best_f_measure = -1
+    min_score = min(pred_edge_list, key=itemgetter(2))[2]
+    max_score = max(pred_edge_list, key=itemgetter(2))[2]
+    step = math.ceil(abs((min_score - max_score) / 500))
+    for i in range(min_score, max_score, step):
+        precision, recall = gc.compare_edge_lists(pred_edge_list, gt_edges, threshold=i)
+        f_measure = FALPHA * precision + FBETA * recall
+        if (f_measure > best_f_measure) & (precision != 1):
+            best_f_measure = f_measure
+            best_precision = precision
+            best_recall = recall
+            best_threshold = i
+
+    print("%s scores with threshold %s: Precision: %s; Recall: %s; F-Measure: %s"
+          % (name, best_threshold, best_precision, best_recall, best_f_measure))
+    print("%s calculations took %s seconds" % (name, time.time() - start_time))
 
 
 if __name__ == '__main__':
