@@ -5,6 +5,7 @@ from snacs_2017.snacs_graph_dissolution.GraphComparator import GraphComparator a
 from operator import itemgetter
 import math
 import time
+import numpy as np
 
 
 def main_function():
@@ -18,8 +19,15 @@ def main_function():
     # edges decreased, nodes constant
     print("Starting graph processing operations")
 
-    execute_tests("Preferential attachment", trainings_graph, gt_edges, gp.preferential_attachment)
-    execute_tests("Common neighbors", trainings_graph, gt_edges, gp.common_neighbors)
+    # execute_tests("Preferential attachment", trainings_graph, gt_edges, gp.preferential_attachment)
+    # execute_tests("Common neighbors", trainings_graph, gt_edges, gp.common_neighbors)
+    # execute_tests("Cosine similarity", trainings_graph, gt_edges, gp.cosine_similarity)
+    # execute_tests("Jaccard index", trainings_graph, gt_edges, gp.jaccard_index)
+    execute_tests()
+
+    start_time = time.time()
+    gp.get_complement_network(trainings_graph)
+    print("Complementing the network took %s seconds." % (time.time() - start_time))
 
     print("Exiting...")
 
@@ -38,8 +46,8 @@ def execute_tests(name, trainings_graph, gt_edges, func):
     best_f_measure = -1
     min_score = min(pred_edge_list, key=itemgetter(2))[2]
     max_score = max(pred_edge_list, key=itemgetter(2))[2]
-    step = math.ceil(abs((min_score - max_score) / 500))
-    for i in range(min_score, max_score, step):
+    step = abs((min_score - max_score) / 500)
+    for i in np.arange(min_score, max_score, step):
         precision, recall = gc.compare_edge_lists(pred_edge_list, gt_edges, threshold=i)
         f_measure = FALPHA * precision + FBETA * recall
         if (f_measure > best_f_measure) & (precision != 1):

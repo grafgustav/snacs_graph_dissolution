@@ -1,4 +1,6 @@
 import networkx as nx
+import math
+import numpy as np
 
 
 class GraphProcessor:
@@ -77,15 +79,17 @@ class GraphProcessor:
         """
         degrees = dict()
         for node in nx.nodes(graph):
-            degrees[node] = set(nx.degree(graph, node))      
+            degrees[node] = nx.degree(graph, node)
 
+        neighbor_dictionary = dict()
+        for node in nx.nodes(graph):
+            neighbor_dictionary[node] = set(nx.neighbors(graph, node))
 
         result = []
-    
         for source, target in nx.edges(graph):
-
             result.append((source, target,
-                           (-1) * len(neighbor_dictionary[source].intersection(neighbor_dictionary[target] / math.sqrt(degrees[source] * math.sqrt(degrees[target])))))
+                           (-1) * (len(neighbor_dictionary[source].intersection(neighbor_dictionary[target]))
+                                   / math.sqrt(degrees[source] * math.sqrt(degrees[target])))))
   
         return result
 
@@ -99,10 +103,14 @@ class GraphProcessor:
         """
         result = []
 
-        for source, target in nx.edges(graph):
+        neighbor_dictionary = dict()
+        for node in nx.nodes(graph):
+            neighbor_dictionary[node] = set(nx.neighbors(graph, node))
 
+        for source, target in nx.edges(graph):
             result.append((source, target,
-                           (-1) * len(neighbor_dictionary[source].intersection(neighbor_dictionary[target] / len(neighbor_dictionary[source] .union(neighbor_dictionary[target])))))
+                           (-1) * (len(neighbor_dictionary[source].intersection(neighbor_dictionary[target]))
+                                   / len(neighbor_dictionary[source].union(neighbor_dictionary[target])))))
         return result
 
     @staticmethod
@@ -177,3 +185,17 @@ class GraphProcessor:
         result = []
 
         return result
+
+    @staticmethod
+    def get_complement_network(graph):
+        """
+        Returns the complement network of the input graph.
+        :param graph: input graph
+        :return: adjacency matrix of complement network
+        """
+        dim = max(nx.nodes(graph))+1
+        adj_matrix = np.zeros((dim, dim))
+        for node in nx.nodes(graph):
+            for neighbor in nx.neighbors(graph, node):
+                adj_matrix[node][neighbor] = 1
+        return adj_matrix
