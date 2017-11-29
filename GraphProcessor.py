@@ -99,6 +99,10 @@ class GraphProcessor:
         """
         result = []
 
+        for source, target in nx.edges(graph):
+
+            result.append((source, target,
+                           (-1) * len(neighbor_dictionary[source].intersection(neighbor_dictionary[target] / len(neighbor_dictionary[source] .union(neighbor_dictionary[target])))))
         return result
 
     @staticmethod
