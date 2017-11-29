@@ -16,9 +16,15 @@ def main_function():
     print("Starting graph processing operations")
     pred_edge_list = gp.preferential_attachment(trainings_graph)
     print("Calculating first score")
-    for i in range(4870, 4900, 1):
+    for i in range(4870, 4900, 10):
         precision, recall = gc.compare_edge_lists(pred_edge_list, gt_edges, threshold=i*(-1))
         print("Preferential Attachment scores: Precision: %s; Recall: %s" % (precision, recall))
+
+    pred_edge_list = gp.common_neighbors(trainings_graph)
+    for i in range(0, 50, 10):
+        precision, recall = gc.compare_edge_lists(pred_edge_list, gt_edges, threshold=i*(-1))
+        print("Common neighbors scores: Precision: %s; Recall: %s" % (precision, recall))
+
     print("Exiting...")
 
 

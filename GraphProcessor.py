@@ -57,8 +57,14 @@ class GraphProcessor:
         :param graph: input graph as adjacency matrix
         :return: adjacency matrix containing probabilities
         """
-        result = []
+        neighbor_dictionary = dict()
+        for node in nx.nodes(graph):
+            neighbor_dictionary[node] = set(nx.neighbors(graph, node))
 
+        result = []
+        for source, target in nx.edges(graph):
+            result.append((source, target,
+                           (-1) * len(neighbor_dictionary[source].intersection(neighbor_dictionary[target]))))
         return result
 
     @staticmethod
