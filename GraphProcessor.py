@@ -31,13 +31,20 @@ class GraphProcessor:
         """
         Using the degree of the two nodes being connected by an edge, predict the probability of this edge to be removed.
         :param graph: input graph as adjacency matrix
-        :return: edge list containing probabilities
+        :return: edge list containing probabilities (source, target, score)
         """
         # result list contains edges and their predicted scores (source, target, score)
+        degrees = dict()
+        for node in nx.nodes(graph):
+            degrees[node] = nx.degree(graph, node)
+        return GraphProcessor._preferential_attachment(graph, degrees)
+
+    @staticmethod
+    def _preferential_attachment(graph, degrees):
         result = []
         for source, target in graph.edges:
-            source_degree = nx.degree(graph, source)
-            target_degree = nx.degree(graph, target)
+            source_degree = degrees[source]
+            target_degree = degrees[target]
             score = -1 * source_degree * target_degree
             result.append((source, target, score))
         return result

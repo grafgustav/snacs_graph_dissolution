@@ -1,4 +1,5 @@
 import networkx as nx
+import _pickle as pickle
 
 
 class WikipediaParser:
@@ -7,8 +8,10 @@ class WikipediaParser:
     some functionality to split the data into separate graphs.
     """
     # the two graphs
-    _graph1 = nx.DiGraph()
-    _graph2 = nx.DiGraph()
+    _graph1 = nx.DiGraph()  # training
+    _graph2 = nx.DiGraph()  # ground truth
+
+    _gt_edges = []
 
     # raw data
     _edges = []
@@ -16,15 +19,25 @@ class WikipediaParser:
     _timestamps = []
     _median_timestamp = -1
 
-    def __init__(self, filename):
+    PIK_NAME = "pickle.dat"
+
+    def __init__(self, filename, load=False):
         """
         Constructor of the WikipediaParser class. Takes a filename as input to read the dataset from.
         :param filename: input file for the dataset
         """
         print("Wikipedia Parser initialized")
-        self._edges, self._timestamps = self._read_data(filename)
-        self._median_timestamp = self.get_median_timestamp()
-        self._graph1, self._graph2 = self._build_graphs()
+        if not load:
+            print("Data not persisted")
+            self._edges, self._timestamps = self._read_data(filename)
+            self._median_timestamp = self.get_median_timestamp()
+            self._graph1, self._graph2 = self._build_graphs()
+            with open(self.PIK_NAME, "wb") as f:
+                data = (self._graph1, self._graph2, self._gt_edges)
+                pickle.dump(data, f)
+        else:
+            with open(self.PIK_NAME, "rb") as f:
+                self._graph1, self._graph2, self._gt_edges = pickle.load(f)
 
     @staticmethod
     def _read_data(filename):
@@ -60,6 +73,9 @@ class WikipediaParser:
     def get_median_timestamp(self):
         median = self._timestamps[int(len(self._timestamps)/2)]
         return median
+
+    def get_gt_edges(self):
+        return self._gt_edges
 
     def _build_graphs(self):
         """
@@ -99,6 +115,7 @@ class WikipediaParser:
         g2 = g1.copy()
         for source, target, weight in self._remaining_edges:
             if weight == -1:
+                self._gt_edges.append((source, target))
                 if g2.has_edge(source, target):
                     g2.remove_edge(source, target)
         return g2

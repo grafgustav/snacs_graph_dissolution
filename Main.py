@@ -6,20 +6,19 @@ from snacs_2017.snacs_graph_dissolution.GraphComparator import GraphComparator a
 
 def main_function():
     print("...Entering")
-    wp = WikipediaParser("out.link-dynamic-simplewiki")
+    wp = WikipediaParser("out.link-dynamic-simplewiki", load=True)
     trainings_graph = wp.get_first_subgraph()
-    groundtruth_graph = wp.get_second_subgraph()
+    gt_edges = wp.get_gt_edges()
     print(
         "Trainings graph: %s edges, %s nodes" % (trainings_graph.number_of_edges(), trainings_graph.number_of_nodes()))
-    print(
-        "GT graph: %s edges, %s nodes" % (groundtruth_graph.number_of_edges(), groundtruth_graph.number_of_nodes()))
+    print("%s edges to be deleted" % len(gt_edges))
     # edges decreased, nodes constant
     print("Starting graph processing operations")
     pred_edge_list = gp.preferential_attachment(trainings_graph)
-    print(pred_edge_list)
-    pred_graph = gp.transform_scored_edge_list_to_graph(pred_edge_list, trainings_graph, threshold=-1000)
-    precision, recall = gc.compare_grahs(pred_graph, groundtruth_graph)
-    print("Preferential Attachment scores: Precision: %s; Recall: %s" % (precision, recall))
+    print("Calculating first score")
+    for i in range(4870, 4900, 1):
+        precision, recall = gc.compare_edge_lists(pred_edge_list, gt_edges, threshold=i*(-1))
+        print("Preferential Attachment scores: Precision: %s; Recall: %s" % (precision, recall))
     print("Exiting...")
 
 

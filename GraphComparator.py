@@ -1,4 +1,5 @@
 import networkx as nx
+import time
 
 
 class GraphComparator:
@@ -35,7 +36,7 @@ class GraphComparator:
         return precision, recall
 
     @staticmethod
-    def compare_edge_lists(pred_edge_list, gt_edge_list):
+    def compare_edge_lists(pred_edge_list, gt_edge_list, threshold):
         """
         Compare two edge lists of edges to be deleted.
         :param pred_edge_list: The predicted edge list
@@ -43,11 +44,12 @@ class GraphComparator:
         :return: precision, recall
         """
         true_positives = 0
-        for edge in pred_edge_list:
-            if edge in gt_edge_list:
+        set_list = set(gt_edge_list)
+        for source, target, score in pred_edge_list:
+            if (source, target) in set_list:
                 true_positives += 1
 
-        recall = true_positives / len(gt_edge_list)
-        precision = true_positives / len(pred_edge_list)
+        recall = true_positives / len(set_list)
+        precision = true_positives / len(set_list)
 
         return precision, recall
