@@ -35,14 +35,10 @@ class GraphProcessor:
         :param graph: input graph as adjacency matrix
         :return: edge list containing probabilities (source, target, score)
         """
-        # result list contains edges and their predicted scores (source, target, score)
         degrees = dict()
         for node in nx.nodes(graph):
             degrees[node] = nx.degree(graph, node)
-        return GraphProcessor._preferential_attachment(graph, degrees)
 
-    @staticmethod
-    def _preferential_attachment(graph, degrees):
         result = []
         for source, target in graph.edges:
             source_degree = degrees[source]
@@ -149,8 +145,16 @@ class GraphProcessor:
         :param graph: input graph as adjacency matrix
         :return: adjacency matrix containing probabilities
         """
-        result = []
+        degrees = dict()
+        for node in nx.nodes(graph):
+            degrees[node] = nx.degree(graph, node)
 
+        result = []
+        for source, target in graph.edges:
+            source_degree = degrees[source]
+            target_degree = degrees[target]
+            score = source_degree * target_degree
+            result.append((source, target, score))
         return result
 
     @staticmethod
@@ -161,8 +165,14 @@ class GraphProcessor:
         :param graph: input graph as adjacency matrix
         :return: adjacency matrix containing probabilities
         """
-        result = []
+        neighbor_dictionary = dict()
+        for node in nx.nodes(graph):
+            neighbor_dictionary[node] = set(nx.neighbors(graph, node))
 
+        result = []
+        for source, target in nx.edges(graph):
+            result.append((source, target,
+                           len(neighbor_dictionary[source].intersection(neighbor_dictionary[target]))))
         return result
 
     @staticmethod
@@ -173,7 +183,19 @@ class GraphProcessor:
         :param graph: input graph as adjacency matrix
         :return: adjacency matrix containing probabilities
         """
+        degrees = dict()
+        for node in nx.nodes(graph):
+            degrees[node] = nx.degree(graph, node)
+
+        neighbor_dictionary = dict()
+        for node in nx.nodes(graph):
+            neighbor_dictionary[node] = set(nx.neighbors(graph, node))
+
         result = []
+        for source, target in nx.edges(graph):
+            result.append((source, target,
+                           (len(neighbor_dictionary[source].intersection(neighbor_dictionary[target]))
+                                   / math.sqrt(degrees[source] * math.sqrt(degrees[target])))))
 
         return result
 
@@ -187,6 +209,14 @@ class GraphProcessor:
         """
         result = []
 
+        neighbor_dictionary = dict()
+        for node in nx.nodes(graph):
+            neighbor_dictionary[node] = set(nx.neighbors(graph, node))
+
+        for source, target in nx.edges(graph):
+            result.append((source, target,
+                           (len(neighbor_dictionary[source].intersection(neighbor_dictionary[target]))
+                                   / len(neighbor_dictionary[source].union(neighbor_dictionary[target])))))
         return result
 
     @staticmethod
@@ -196,9 +226,21 @@ class GraphProcessor:
         :param graph: input graph as adjacency matrix
         :return: adjacency matrix containing probabilities
         """
-                          
-                          
+        degrees = dict()
+        for node in nx.nodes(graph):
+            degrees[node] = nx.degree(graph, node)
+
+        neighbor_dictionary = dict()
+        for node in nx.nodes(graph):
+            neighbor_dictionary[node] = set(nx.neighbors(graph, node))
+
         result = []
+        for source, target in nx.edges(graph):
+            k_sum = 0
+            for node in neighbor_dictionary[source].intersection(neighbor_dictionary[target]):
+                if degrees[node] > 1:
+                    k_sum += 1/math.log2(degrees[node])
+            result.append((source, target, k_sum))
 
         return result
 
@@ -210,8 +252,19 @@ class GraphProcessor:
         :return: adjacency matrix of complement network
         """
         dim = max(nx.nodes(graph))+1
-        adj_matrix = np.zeros((dim, dim))
+        adj_matrix = np.zeros((dim, dim), dtype=np.bool)
         for node in nx.nodes(graph):
             for neighbor in nx.neighbors(graph, node):
                 adj_matrix[node][neighbor] = 1
         return adj_matrix
+
+    ####################################################################################################################
+    # Some own tries at predicting the removal of edges
+
+    @staticmethod
+    def consider_in_and_out_degree(graph):
+        in_degrees = dict()
+        out_degrees = dict()
+        for node in nx.nodes(graph):
+            in_degrees[node] = node.in_degree
+            out_degrees[node] = node.out_degree

@@ -51,6 +51,8 @@ class WikipediaParser:
         edges = []
         for line in file:
             # source target weight timestamp
+            if line.startswith("%"):
+                continue
             spl = line.split()
             if len(spl) == 4:
                 # store that stuff in triples (source, target, weight, timestamp)
@@ -71,7 +73,7 @@ class WikipediaParser:
         return max(self._timestamps)
 
     def get_median_timestamp(self):
-        median = self._timestamps[int(len(self._timestamps)/2)]
+        median = self._timestamps[int(len(self._timestamps)*(3/4))]
         return median
 
     def get_gt_edges(self):

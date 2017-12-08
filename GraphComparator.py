@@ -1,5 +1,6 @@
 import networkx as nx
-import time
+import random
+from sklearn.metrics import average_precision_score
 
 
 class GraphComparator:
@@ -54,3 +55,35 @@ class GraphComparator:
         precision = true_positives / len(scored_positives)
 
         return precision, recall
+
+    @staticmethod
+    def calculate_average_precision(gt, training, result):
+        """
+        Calculates the Average Precision score using the sklearn.metrics method.
+        :param gt: Ground Truth = Test Set = True Positives
+        :param training: Training set used for prediction
+        :param result: Set of predicted scores
+        :return: AP
+        """
+        sample_set = list(training)
+        random.shuffle(sample_set)
+        true_sample_list = gt + sample_set[:len(gt)]
+
+        score_dict = dict()
+        for source, target, score in result:
+            score_dict[(source, target)] = score
+
+        score_list = []
+        for i in range(len(true_sample_list)):
+            score_list.append(score_dict.get(true_sample_list[i], 0))
+
+        true_label_list = [1 for _ in range(len(gt))] + [0 for _ in range(len(gt))]
+
+        return average_precision_score(true_label_list, score_list)
+
+    @staticmethod
+    def get_dict_from_list(in_list):
+        result_dict = dict()
+        for source, target, score in in_list:
+            result_dict[(source, target)] = score
+        return result_dict
